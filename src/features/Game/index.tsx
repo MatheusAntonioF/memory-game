@@ -82,24 +82,25 @@ export function Game(): JSX.Element {
     <>
       {wasPlayerWin ? (
         <div className="grid place-items-center w-full h-full">
-          <h1 className="text-6xl">Congratulations</h1>
-          <button className="text-2xl" onClick={resetGame}>
+          <h1 className="text-6xl text-slate-50">Congratulations</h1>
+          <button className="text-slate-50" onClick={resetGame}>
             Play again?
           </button>
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-4 grid-rows-4 w-full h-full">
+        <div className="grid gap-5 grid-cols-4 grid-rows-4 w-full h-full">
           {CARDS.map((row, rowIndex) => {
             return row.map((cardNumber, columnIndex) => {
               const isMatchedCard = matchedCards.includes(cardNumber);
+              console.log("🚀 ~ isMatchedCard:", isMatchedCard);
 
               return (
                 <button
                   key={`card_${rowIndex}_${columnIndex}`}
                   className={classNames(
-                    "bg-slate-300 rounded grid place-items-center text-2xl transition-transform hover:scale-105",
+                    "bg-zinc-700 shadow-zinc-900 shadow-sm text-slate-50 rounded grid place-items-center text-2xl transition-transform hover:scale-105",
                     {
-                      "bg-green-200": isMatchedCard,
+                      "!bg-green-400 text-slate-800": isMatchedCard,
                     }
                   )}
                   onClick={() =>
