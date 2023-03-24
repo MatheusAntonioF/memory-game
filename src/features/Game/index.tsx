@@ -1,4 +1,5 @@
 import { useState } from "react";
+import classNames from "classnames";
 
 type ICard = number[][];
 
@@ -8,7 +9,7 @@ type ICardPosition = {
   cardNumber: number;
 };
 
-const cards: ICard = [
+const CARDS: ICard = [
   [1, 2, 3, 4],
   [1, 2, 3, 4],
   [5, 5, 6, 6],
@@ -19,14 +20,24 @@ export function Game(): JSX.Element {
   const [revealedCards, setRevealedCards] = useState<ICardPosition[]>([]);
   const [wasPlayerWin, setWasPlayerWin] = useState<boolean>(false);
 
-  const [matchedCardsNumber, setMatchedCardsNumber] = useState<number[]>([]);
+  const [matchedCards, setMatchedCards] = useState<number[]>([]);
 
-  function playerWon() {}
+  function playerWon() {
+    const totalCardsMatched = matchedCards.length + 1;
+
+    const totalCardsInGame = CARDS.reduce((accumulator, cardNumber) => {
+      return accumulator + cardNumber.length;
+    }, 0);
+
+    const individualCardsInGame = totalCardsInGame / 2;
+
+    setWasPlayerWin(totalCardsMatched === individualCardsInGame);
+  }
 
   function matchCards(firstCard: ICardPosition, secondCard: ICardPosition) {
     if (firstCard.cardNumber !== secondCard.cardNumber) return;
 
-    setMatchedCardsNumber(prevMatchedCards => {
+    setMatchedCards(prevMatchedCards => {
       return [...prevMatchedCards, firstCard.cardNumber];
     });
 
@@ -48,7 +59,7 @@ export function Game(): JSX.Element {
   }
 
   function isRevealedCard({ row, column, cardNumber }: ICardPosition) {
-    if (matchedCardsNumber.includes(cardNumber)) return true;
+    if (matchedCards.includes(cardNumber)) return true;
 
     let isRevealed = false;
 
@@ -61,29 +72,57 @@ export function Game(): JSX.Element {
     return isRevealed;
   }
 
+  function resetGame() {
+    setRevealedCards([]);
+    setWasPlayerWin(false);
+    setMatchedCards([]);
+  }
+
   return (
-    <div className="grid gap-2 grid-cols-4 grid-rows-4 w-full h-full">
-      {cards.map((row, rowIndex) => {
-        return row.map((cardNumber, columnIndex) => {
-          return (
-            <button
-              key={`card_${rowIndex}_${columnIndex}`}
-              className="bg-slate-300 rounded grid place-items-center text-2xl hover:bg-slate-400"
-              onClick={() =>
-                onCardClick({ row: rowIndex, column: columnIndex, cardNumber })
-              }
-            >
-              {isRevealedCard({
-                row: rowIndex,
-                column: columnIndex,
-                cardNumber: cardNumber,
-              })
-                ? cardNumber
-                : ""}
-            </button>
-          );
-        });
-      })}
-    </div>
+    <>
+      {wasPlayerWin ? (
+        <div className="grid place-items-center w-full h-full">
+          <h1 className="text-6xl">Congratulations</h1>
+          <button className="text-2xl" onClick={resetGame}>
+            Play again?
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-3 grid-cols-4 grid-rows-4 w-full h-full">
+          {CARDS.map((row, rowIndex) => {
+            return row.map((cardNumber, columnIndex) => {
+              const isMatchedCard = matchedCards.includes(cardNumber);
+
+              return (
+                <button
+                  key={`card_${rowIndex}_${columnIndex}`}
+                  className={classNames(
+                    "bg-slate-300 rounded grid place-items-center text-2xl transition-transform hover:scale-105",
+                    {
+                      "bg-green-200": isMatchedCard,
+                    }
+                  )}
+                  onClick={() =>
+                    onCardClick({
+                      row: rowIndex,
+                      column: columnIndex,
+                      cardNumber,
+                    })
+                  }
+                >
+                  {isRevealedCard({
+                    row: rowIndex,
+                    column: columnIndex,
+                    cardNumber: cardNumber,
+                  })
+                    ? cardNumber
+                    : ""}
+                </button>
+              );
+            });
+          })}
+        </div>
+      )}
+    </>
   );
 }
